@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Welcome to Indonesia - Starter Pack WNI 3D</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sawit: {
+                            50: '#f2f9f1',
+                            100: '#e1f2df',
+                            500: '#2D5A27',
+                            600: '#23471f',
+                            700: '#1a3718',
+                            800: '#132812',
+                            900: '#0a160a'
+                        },
+                        minyak: {
+                            300: '#ffe082',
+                            400: '#ffd54f',
+                            500: '#FFC107',
+                            600: '#ffb300',
+                            700: '#ffa000'
+                        },
+                        merahWni: '#E11D48',
+                        kertas: '#FFFDF5'
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        display: ['Fredoka', 'Plus Jakarta Sans', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'clay-sm': '0 4px 0 0 #CBD5E1, 0 6px 12px rgba(0,0,0,0.06)',
+                        'clay-card': '0 10px 0 0 #94A3B8, 0 20px 30px -10px rgba(0,0,0,0.12)',
+                        'clay-green': '0 8px 0 0 #132812, 0 16px 25px rgba(45,90,39,0.25)',
+                        'clay-gold': '0 8px 0 0 #b38600, 0 16px 25px rgba(255,193,7,0.3)',
+                        'clay-red': '0 8px 0 0 #9f1239, 0 16px 25px rgba(225,29,72,0.3)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Three.js 3D Library & Controls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #F1F7F0;
+            color: #0F172A;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1, h2, h3, .font-display {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Claymorphism Dynamic Card */
+        .clay-box {
+            background: #ffffff;
+            border: 3px solid #E2E8F0;
+            border-radius: 28px;
+            box-shadow: 0 10px 0 0 #CBD5E1, 0 20px 30px -8px rgba(0,0,0,0.08);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .clay-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 0 0 #94A3B8, 0 25px 35px -10px rgba(0,0,0,0.14);
+        }
+
+        .clay-input {
+            background: #F8FAFC;
+            border: 2.5px solid #CBD5E1;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.04);
+            transition: all 0.2s ease;
+        }
+
+        .clay-input:focus {
+            background: #FFFFFF;
+            border-color: #2D5A27;
+            box-shadow: 0 0 0 4px rgba(45, 90, 39, 0.15);
+            outline: none;
+        }
+
+        /* Pulsing Glow Animation */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 193, 7, 0.5), 0 8px 0 #b38600; }
+            50% { box-shadow: 0 0 28px rgba(255, 193, 7, 0.9), 0 8px 0 #b38600; }
+        }
+
+        .glow-button {
+            animation: pulseGlow 2.5s infinite ease-in-out;
+        }
+
+        /* Ticker Loop Animation */
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .animate-ticker {
+            display: flex;
+            width: 200%;
+            animation: ticker 32s linear infinite;
+        }
+
+        .animate-ticker:hover {
+            animation-play-state: paused;
+        }
+
+        /* Floating Animation */
+        @keyframes floatAnim {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1.2deg); }
+        }
+
+        .floating-element {
+            animation: floatAnim 4s ease-in-out infinite;
+        }
+
+        /* Custom 3D SVG Icon Box */
+        .icon-3d-box {
+            background: linear-gradient(145deg, #ffffff, #e2e8f0);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.9), 0 6px 0 #cbd5e1;
+            border: 2.5px solid #ffffff;
+        }
+
+        /* Custom Toast Notification */
+        #toastNotice {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        }
+
+        /* Range Slider Styling */
+        input[type=range] {
+            accent-color: #2D5A27;
+        }
+    </style>
+</head>
+<body class="bg-[#F1F7F0] text-slate-800 antialiased selection:bg-minyak-500 selection:text-sawit-900 pb-12">
+
+    <!-- Top Satire Live News Ticker -->
+    <div class="bg-sawit-900 text-amber-300 text-xs font-bold py-2.5 overflow-hidden border-b-2 border-minyak-500 z-50 relative">
+        <div class="animate-ticker flex whitespace-nowrap gap-8">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-server text-emerald-400"></i> SERVER INDONESIA ONLINE: ServerIndonesiaV1.vercel.app</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-seedling text-emerald-400"></i> UPDATE SERVER v2026: Panen Kelapa Sawit Melimpah, Pasokan Minyak Goreng Murni Terjamin!</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-cloud-showers-heavy text-sky-400"></i> EVENT SEMENTARA: Hujan Lokal Hanyalah Milik Rumah RT 04</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-motorcycle text-amber-400"></i> SKILL UNLOCKED: Emak-Emak Sen Kiri Belok Kanan (+999 Defense)</span>
+            <!-- Loop Duplicate -->
+            <span class="flex items-center gap-2"><i class="fa-solid fa-server text-emerald-400"></i> SERVER INDONESIA ONLINE: ServerIndonesiaV1.vercel.app</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-seedling text-emerald-400"></i> UPDATE SERVER v2026: Panen Kelapa Sawit Melimpah, Pasokan Minyak Goreng Murni Terjamin!</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-cloud-showers-heavy text-sky-400"></i> EVENT SEMENTARA: Hujan Lokal Hanyalah Milik Rumah RT 04</span>
+            <span class="flex items-center gap-2"><i class="fa-solid fa-motorcycle text-amber-400"></i> SKILL UNLOCKED: Emak-Emak Sen Kiri Belok Kanan (+999 Defense)</span>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b-4 border-sawit-500 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#hero" onclick="playSound('pop')" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 bg-gradient-to-tr from-sawit-700 to-emerald-500 rounded-2xl flex items-center justify-center text-white text-xl shadow-clay-sm group-hover:rotate-6 transition-transform border-2 border-white">
+                    <i class="fa-solid fa-tree text-amber-300"></i>
+                </div>
+                <div>
+                    <div class="font-display font-extrabold text-base sm:text-xl text-sawit-900 tracking-tight flex items-center gap-2">
+                        SERVER INDONESIA 
+                        <span class="bg-merahWni text-white text-[10px] px-2 py-0.5 rounded-full font-sans font-black">WNI 2026</span>
+                    </div>
+                    <div class="text-[11px] text-sawit-600 font-bold hidden sm:block">ServerIndonesiaV1.vercel.app</div>
+                </div>
+            </a>
+
+            <!-- Nav Links (Desktop) -->
+            <div class="hidden md:flex items-center gap-6 font-bold text-xs sm:text-sm text-slate-700">
+                <a href="#hero" class="hover:text-sawit-600 transition-colors">Spawning Area</a>
+                <a href="#starter-pack" class="hover:text-sawit-600 transition-colors">Starter Pack</a>
+                <a href="#wni-form" class="hover:text-sawit-600 transition-colors">Paspor Generator</a>
+                <a href="#sawit-market" class="hover:text-sawit-600 transition-colors">Pasar Sawit</a>
+            </div>
+
+            <!-- Action CTA Buttons -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button type="button" onclick="toggleAudio()" id="audioBtn" class="p-2.5 sm:px-3 sm:py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl border-2 border-amber-300 transition-all text-xs font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-volume-high text-amber-700" id="audioIcon"></i>
+                    <span class="hidden sm:inline">SFX: ON</span>
+                </button>
+                <a href="#wni-form" onclick="playSound('click')" class="bg-merahWni hover:bg-rose-700 text-white font-extrabold px-3.5 py-2.5 rounded-xl shadow-clay-red active:translate-y-1 transition-all text-xs sm:text-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-address-card"></i>
+                    <span>Buat Paspor</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="relative overflow-hidden pt-6 pb-12 lg:pt-10 lg:pb-16 bg-gradient-to-b from-emerald-100/60 via-amber-50/40 to-transparent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+                
+                <!-- Hero Left Content -->
+                <div class="lg:col-span-6 space-y-4 sm:space-y-5 text-center lg:text-left">
+                    
+                    <!-- Server Badge -->
+                    <div class="inline-flex items-center gap-2 bg-sawit-100 border-2 border-sawit-500 text-sawit-900 px-3.5 py-1.5 rounded-full font-extrabold text-xs shadow-sm floating-element">
+                        <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span>
+                        <i class="fa-solid fa-flag text-merahWni"></i> SERVER INDONESIA: ONLINE • DIFFICULTY: HARDCORE
+                    </div>
+
+                    <!-- Headline 3D Bold -->
+                    <h1 class="text-3xl sm:text-5xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.18]">
+                        Selamat Datang di Dunia! <br>
+                        <span class="bg-gradient-to-r from-sawit-600 via-emerald-600 to-amber-500 bg-clip-text text-transparent">
+                            Hero Kamu Lahir di Server Indonesia 🇮🇩
+                        </span>
+                    </h1>
+
+                    <!-- Subheadline -->
+                    <p class="text-xs sm:text-base text-slate-600 font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
+                        Selamat! Kamu telah berhasil spawning jadi WNI dengan status keanggotaan: <span class="text-sawit-800 font-extrabold bg-amber-200/90 px-2 py-0.5 rounded border border-amber-300">Wajib Tahu Kelapa Sawit</span>. Nikmati perk kebal cuaca ekstrem, skill bawa galon naik motor matic, dan pasokan minyak goreng tak terbatas!
+                    </p>
+
+                    <!-- Quick Stats Badges -->
+                    <div class="grid grid-cols-3 gap-2.5 sm:gap-3 max-w-md mx-auto lg:mx-0 pt-1">
+                        <div class="bg-white p-3 rounded-2xl border-2 border-slate-200 shadow-clay-sm text-center">
+                            <div class="text-lg sm:text-2xl font-black text-sawit-600"><i class="fa-solid fa-tree text-emerald-600"></i> 100%</div>
+                            <div class="text-[10px] sm:text-xs font-extrabold text-slate-500">Kadar Sawit</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-2xl border-2 border-slate-200 shadow-clay-sm text-center">
+                            <div class="text-lg sm:text-2xl font-black text-amber-500"><i class="fa-solid fa-shield text-amber-500"></i> +999</div>
+                            <div class="text-[10px] sm:text-xs font-extrabold text-slate-500">Immunity Macet</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-2xl border-2 border-slate-200 shadow-clay-sm text-center">
+                            <div class="text-lg sm:text-2xl font-black text-merahWni"><i class="fa-solid fa-gift text-rose-500"></i> FREE</div>
+                            <div class="text-[10px] sm:text-xs font-extrabold text-slate-500">Akta Spawning</div>
+                        </div>
+                    </div>
+
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
+                        <a href="#wni-form" onclick="playSound('cheer')" class="glow-button w-full sm:w-auto bg-minyak-500 hover:bg-amber-400 text-slate-900 font-extrabold text-sm sm:text-base px-6 py-3.5 rounded-2xl shadow-clay-gold active:translate-y-1 transition-all flex items-center justify-center gap-2.5">
+                            <i class="fa-solid fa-address-card text-lg"></i>
+                            <span>Buat & Simpan Paspor WNI</span>
+                        </a>
+                        
+                        <a href="#starter-pack" onclick="playSound('click')" class="w-full sm:w-auto bg-white hover:bg-slate-50 text-slate-800 font-bold px-5 py-3.5 rounded-2xl border-2 border-slate-300 shadow-clay-sm active:translate-y-1 transition-all flex items-center justify-center gap-2 text-xs sm:text-sm">
+                            <i class="fa-solid fa-boxes-stacked text-sawit-600"></i>
+                            <span>Lihat Starter Pack</span>
+                        </a>
+                    </div>
+
+                    <p class="text-[11px] text-slate-500 font-semibold italic text-center lg:text-left flex items-center justify-center lg:justify-start gap-1">
+                        <i class="fa-solid fa-globe text-sawit-600"></i> Official Server: <span class="font-bold text-sawit-800">ServerIndonesiaV1.vercel.app</span>
+                    </p>
+                </div>
+
+                <!-- Hero Right Interactive 3D Canvas Container -->
+                <div class="lg:col-span-6 relative flex items-center justify-center">
+                    <div class="w-full h-[360px] sm:h-[450px] bg-gradient-to-b from-emerald-100 to-amber-100/80 rounded-3xl border-4 border-white shadow-xl relative overflow-hidden group">
+                        
+                        <!-- Three.js Render Viewport -->
+                        <div id="three-hero-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+
+                        <!-- 3D Overlay Badge -->
+                        <div class="absolute top-3 left-3 z-20 flex flex-wrap gap-2">
+                            <span class="bg-white/95 backdrop-blur-md px-3 py-1 rounded-full text-xs font-extrabold text-sawit-800 shadow border border-emerald-300 flex items-center gap-1.5">
+                                <i class="fa-solid fa-cube text-sawit-600 animate-spin"></i> Interactive 3D Pixar Engine
+                            </span>
+                        </div>
+
+                        <!-- Interactive 3D Control Bar -->
+                        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-2xl border-2 border-emerald-300 shadow-lg max-w-[95%] overflow-x-auto">
+                            <button type="button" onclick="reset3DCamera()" class="px-3 py-2 bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-sawit-700 rounded-xl transition-all font-extrabold text-xs flex items-center gap-1 whitespace-nowrap">
+                                <i class="fa-solid fa-rotate-left"></i> Reset View
+                            </button>
+                            <button type="button" onclick="toggle3DRotation()" id="rotateToggleBtn" class="px-3 py-2 bg-sawit-600 text-white rounded-xl hover:bg-sawit-700 transition-all font-extrabold text-xs flex items-center gap-1 whitespace-nowrap">
+                                <i class="fa-solid fa-arrows-spin"></i> Spin: ON
+                            </button>
+                            <button type="button" onclick="triggerConfetti3D()" class="px-3 py-2 bg-amber-400 text-slate-900 hover:bg-amber-300 rounded-xl transition-all font-extrabold text-xs flex items-center gap-1 whitespace-nowrap">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Sawit Party
+                            </button>
+                        </div>
+
+                        <!-- Floating Item List Overlay (Desktop Only) -->
+                        <div class="absolute top-3 right-3 z-20 bg-white/95 backdrop-blur-md p-3 rounded-2xl border-2 border-emerald-300 shadow-md hidden sm:block max-w-[170px] floating-element">
+                            <div class="flex items-center gap-1.5 text-xs font-black text-sawit-700 mb-1">
+                                <i class="fa-solid fa-box-open text-amber-500"></i> ITEM BAWAAN 3D:
+                            </div>
+                            <ul class="text-[11px] font-bold text-slate-600 space-y-1">
+                                <li class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> Akta Spawning</li>
+                                <li class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> Minyak Pouch 2L</li>
+                                <li class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> Kebun Sawit Mini</li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Starter Pack Section -->
+    <section id="starter-pack" class="py-12 sm:py-16 bg-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+                <div class="inline-block bg-amber-300 text-slate-900 font-extrabold px-3.5 py-1 rounded-full text-xs uppercase tracking-wider mb-2.5 shadow-sm">
+                    <i class="fa-solid fa-layer-group"></i> Fitur & Kejadian Server Indonesia
+                </div>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900">
+                    4 Starter Pack Wajib Kelahiran WNI 🇮🇩
+                </h2>
+                <p class="text-slate-600 text-xs sm:text-sm mt-2 font-medium">
+                    Setiap karakter yang lahir langsung mendapatkan keahlian khusus dan adaptasi lingkungan tingkat tinggi secara otomatis.
+                </p>
+            </div>
+
+            <!-- 3D Card Grid (4 Cards without Plain Text Emojis) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                
+                <!-- CARD 1 -->
+                <div class="clay-box p-5 sm:p-6 flex flex-col justify-between relative group hover:border-sawit-500">
+                    <div class="absolute -top-4 right-5 bg-amber-400 text-slate-900 border-2 border-white font-black text-[11px] px-3 py-0.5 rounded-full shadow-sm">
+                        PACK #01
+                    </div>
+                    <div>
+                        <div class="w-full h-40 bg-gradient-to-br from-emerald-100 to-amber-100 rounded-2xl flex items-center justify-center mb-4 relative overflow-hidden border-2 border-emerald-200">
+                            <div class="text-center group-hover:scale-105 transition-transform duration-300 flex flex-col items-center">
+                                <div class="w-16 h-16 icon-3d-box rounded-2xl flex items-center justify-center text-sawit-700 text-3xl mb-2">
+                                    <i class="fa-solid fa-seedling text-emerald-600"></i>
+                                </div>
+                                <div class="text-[10px] font-extrabold text-sawit-800 bg-white/90 px-3 py-0.5 rounded-full border border-emerald-300 shadow-sm">
+                                    Pohon Sawit Pot 3D
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-lg font-extrabold text-slate-900 mb-2 group-hover:text-sawit-600 transition-colors">
+                            Starter Pack Bayi Baru Lahir
+                        </h3>
+                        <p class="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
+                            Begitu nangis pertama kali, bukan denger musik klasik Mozart tapi denger suara mesin panen sawit tetangga. Selamat, masa depanmu terang seperti minyak goreng Bimoli!
+                        </p>
+                    </div>
+
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sawit-700">
+                        <span><i class="fa-solid fa-volume-high"></i> BGM: Mesin Panen</span>
+                        <span class="bg-emerald-100 px-2.5 py-1 rounded-lg text-sawit-800">+100 Sawit Power</span>
+                    </div>
+                </div>
+
+                <!-- CARD 2 -->
+                <div class="clay-box p-5 sm:p-6 flex flex-col justify-between relative group hover:border-amber-500">
+                    <div class="absolute -top-4 right-5 bg-amber-400 text-slate-900 border-2 border-white font-black text-[11px] px-3 py-0.5 rounded-full shadow-sm">
+                        PACK #02
+                    </div>
+                    <div>
+                        <div class="w-full h-40 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-4 relative overflow-hidden border-2 border-amber-200">
+                            <div class="text-center group-hover:scale-105 transition-transform duration-300 flex flex-col items-center">
+                                <div class="w-16 h-16 icon-3d-box rounded-2xl flex items-center justify-center text-amber-600 text-3xl mb-2">
+                                    <i class="fa-solid fa-road text-amber-600"></i>
+                                </div>
+                                <div class="text-[10px] font-extrabold text-amber-900 bg-white/90 px-3 py-0.5 rounded-full border border-amber-300 shadow-sm">
+                                    Polisi Tidur Beruntun
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="text-lg font-extrabold text-slate-900 mb-2 group-hover:text-amber-600 transition-colors">
+                            Sistem Server Indonesia
+                        </h3>
+                        <p class="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
+                            Tingkat Kesulitan Server: <span class="text-rose-600 font-extrabold">Hardcore</span>. Efek Samping: Kebal cuaca ekstrem, tahan macet 3 jam, dan mahir beralasan <em>"maaf macet ya bang"</em> saat terlambat.
+                        </p>
+                    </div>
+
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-800">
+                        <span><i class="fa-solid fa-shield-halved"></i> Armor: Gorengan</span>
+                        <span class="bg-amber-100 px-2.5 py-1 rounded-lg">Kebal Macet</span>
+                    </div>
+                </div>
+
+                <!-- CARD 3 -->
+                <div class="clay-box p-5 sm:p-6 flex flex-col justify-between relative group hover:border-emerald-500">
+                    <div class="absolute -top-4 right-5 bg-amber-400 text-slate-900 border-2 border-white font-black text-[11px] px-3 py-0.5 rounded-full shadow-sm">
+                        PACK #03
+                    </div>
+                    <div>
+                        <div class="w-full h-40 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center mb-4 relative overflow-hidden border-2 border-emerald-200">
+                            <div class="text-center group-hover:scale-105 transition-transform duration-300 flex flex-col items-center">
+                                <div class="w-16 h-16 icon-3d-box rounded-2xl flex items-center justify-center text-emerald-700 text-3xl mb-2">
+                                    <i class="fa-solid fa-bottle-droplet text-amber-500"></i>
+                                </div>
+                                <div class="text-[10px] font-extrabold text-sawit-800 bg-white/90 px-3 py-0.5 rounded-full border border-emerald-300 shadow-sm">
+                                    Jeriken & Sawit
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="text-lg font-extrabold text-slate-900 mb-2 group-hover:text-sawit-600 transition-colors">
+                            Komoditas Utama Kehidupan
+                        </h3>
+                        <p class="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
+                            Di sini sawit adalah jawaban dari segalanya. Bensin? Pakai sawit. Sabun? Sawit. Topic percakapan pas kumpul keluarga besar? Ngebahas harga sawit per kilo!
+                        </p>
+                    </div>
+
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sawit-700">
+                        <span><i class="fa-solid fa-coins"></i> Ekonomi: Sawit</span>
+                        <span class="bg-emerald-100 px-2.5 py-1 rounded-lg text-sawit-800">Cuan +99</span>
+                    </div>
+                </div>
+
+                <!-- CARD 4 -->
+                <div class="clay-box p-5 sm:p-6 flex flex-col justify-between relative group hover:border-sky-500">
+                    <div class="absolute -top-4 right-5 bg-amber-400 text-slate-900 border-2 border-white font-black text-[11px] px-3 py-0.5 rounded-full shadow-sm">
+                        PACK #04
+                    </div>
+                    <div>
+                        <div class="w-full h-40 bg-gradient-to-br from-sky-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-4 relative overflow-hidden border-2 border-sky-200">
+                            <div class="text-center group-hover:scale-105 transition-transform duration-300 flex flex-col items-center">
+                                <div class="w-16 h-16 icon-3d-box rounded-2xl flex items-center justify-center text-sky-600 text-3xl mb-2">
+                                    <i class="fa-solid fa-cloud-showers-heavy text-sky-500"></i>
+                                </div>
+                                <div class="text-[10px] font-extrabold text-sky-900 bg-white/90 px-3 py-0.5 rounded-full border border-sky-300 shadow-sm">
+                                    Hujan Khusus RT 01
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="text-lg font-extrabold text-slate-900 mb-2 group-hover:text-sky-600 transition-colors">
+                            Event Musiman Server
+                        </h3>
+                        <p class="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
+                            Cuaca tidak menentu: Pagi kepanasan kaya di dalam oven microwave, siang hujan badai petir, sorenya terang benderang lagi sambil nemu jalanan banjir sebetis.
+                        </p>
+                    </div>
+
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-800">
+                        <span><i class="fa-solid fa-umbrella"></i> Perk: Jas Hujan</span>
+                        <span class="bg-sky-100 px-2.5 py-1 rounded-lg">Rain RNG</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Passport Generator Form & Live Canvas Image Exporter Section -->
+    <section id="wni-form" class="py-12 sm:py-16 bg-gradient-to-br from-sawit-900 via-sawit-800 to-slate-900 text-white relative overflow-hidden">
+        <!-- Accent circles -->
+        <div class="absolute -right-20 -top-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <div class="inline-flex items-center gap-2 bg-amber-400 text-slate-900 font-extrabold px-3.5 py-1 rounded-full text-xs uppercase tracking-wider shadow">
+                    <i class="fa-solid fa-id-card"></i> Generator Paspor Karakter WNI
+                </div>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-white mt-2">
+                    Formulir Pendaftaran & Simpan Paspor WNI 🇮🇩
+                </h2>
+                <p class="text-emerald-100/80 text-xs sm:text-sm mt-2 font-medium">
+                    Isi data nama & provinsi tempat kamu spawning. Paspor dapat tersimpan di Local Storage serta bisa langsung diunduh dalam format gambar PNG!
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Left Input Form -->
+                <div class="lg:col-span-5 bg-white/10 backdrop-blur-md p-5 sm:p-6 rounded-3xl border border-white/20 space-y-4 shadow-xl">
+                    <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                        <h3 class="text-base sm:text-lg font-extrabold text-amber-300 flex items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square"></i> Data Karakter WNI
+                        </h3>
+                        <span class="text-[10px] bg-emerald-500/30 text-emerald-300 border border-emerald-400/40 px-2 py-0.5 rounded-full font-bold">
+                            <i class="fa-solid fa-floppy-disk"></i> Auto-Save Local
+                        </span>
+                    </div>
+
+                    <!-- Character Name Input -->
+                    <div>
+                        <label class="block text-xs font-extrabold uppercase text-amber-200 mb-1.5">
+                            Nama Lengkap Karakter:
+                        </label>
+                        <input type="text" id="inputCharName" value="Budi Sawit Saputra" oninput="handleFormChange()" placeholder="Masukkan Nama Karakter..." class="w-full px-4 py-3 rounded-xl bg-slate-900/90 border-2 border-emerald-500/60 text-white font-bold focus:outline-none focus:border-amber-400 text-sm transition-all">
+                    </div>
+
+                    <!-- Province Selector -->
+                    <div>
+                        <label class="block text-xs font-extrabold uppercase text-amber-200 mb-1.5">
+                            Provinsi Spawning (Lahir):
+                        </label>
+                        <select id="inputProvince" onchange="handleFormChange()" class="w-full px-4 py-3 rounded-xl bg-slate-900/90 border-2 border-emerald-500/60 text-white font-bold focus:outline-none focus:border-amber-400 text-sm transition-all">
+                            <option value="Riau (Pusat Sawit Utama)">Riau (Pusat Sawit Utama)</option>
+                            <option value="Sumatra Utara (Perkebunan Unlimited)">Sumatra Utara (Perkebunan Unlimited)</option>
+                            <option value="Sumatra Selatan (Lumbung Energi & Sawit)">Sumatra Selatan (Lumbung Energi & Sawit)</option>
+                            <option value="Jambi (Perkebunan Handal)">Jambi (Perkebunan Handal)</option>
+                            <option value="Kalimantan Barat (Raja Lahan Sawit)">Kalimantan Barat (Raja Lahan Sawit)</option>
+                            <option value="Kalimantan Timur (Pusat Ibu Kota Baru)">Kalimantan Timur (Pusat Ibu Kota Baru)</option>
+                            <option value="DKI Jakarta (Server Macet Extreme)">DKI Jakarta (Server Macet Extreme)</option>
+                            <option value="Jawa Barat (Server Pasundan Adem)">Jawa Barat (Server Pasundan Adem)</option>
+                            <option value="Jawa Tengah (Server Sopan & Kendhi)">Jawa Tengah (Server Sopan & Kendhi)</option>
+                            <option value="Jawa Timur (Server Suroboyo Pedas)">Jawa Timur (Server Suroboyo Pedas)</option>
+                            <option value="Bali (Server Pariwisata & Santai)">Bali (Server Pariwisata & Santai)</option>
+                            <option value="Sulawesi Selatan (Server Pelaut Handal)">Sulawesi Selatan (Server Pelaut Handal)</option>
+                        </select>
+                    </div>
+
+                    <!-- Skill Title Selector -->
+                    <div>
+                        <label class="block text-xs font-extrabold uppercase text-amber-200 mb-1.5">
+                            Gelar Skill Utama:
+                        </label>
+                        <select id="inputSkillTitle" onchange="handleFormChange()" class="w-full px-4 py-3 rounded-xl bg-slate-900/90 border-2 border-emerald-500/60 text-white font-bold focus:outline-none focus:border-amber-400 text-sm transition-all">
+                            <option value="Pakar Harga Sawit & Gorengan">Pakar Harga Sawit & Gorengan</option>
+                            <option value="Pembalap Sen Kiri Belok Kanan">Pembalap Sen Kiri Belok Kanan</option>
+                            <option value="Sultan Kelapa Sawit Riau">Sultan Kelapa Sawit Riau</option>
+                            <option value="Pawang Cuaca & Jas Hujan Plastik">Pawang Cuaca & Jas Hujan Plastik</option>
+                            <option value="Master Macet & Cari Jalan Tikus">Master Macet & Cari Jalan Tikus</option>
+                        </select>
+                    </div>
+
+                    <!-- Avatar Icon Selector -->
+                    <div>
+                        <label class="block text-xs font-extrabold uppercase text-amber-200 mb-1.5">
+                            Pilih Avatar 3D Karakter:
+                        </label>
+                        <div class="grid grid-cols-4 gap-2" id="avatarSelector">
+                            <button type="button" onclick="selectAvatarIcon('baby')" id="btn-avatar-baby" class="avatar-btn p-2.5 bg-slate-900 rounded-xl border-2 border-amber-400 text-amber-400 font-extrabold text-xl flex flex-col items-center justify-center hover:bg-slate-800 transition-all">
+                                <i class="fa-solid fa-baby"></i>
+                                <span class="text-[9px] mt-1 text-white font-bold">Bayi</span>
+                            </button>
+                            <button type="button" onclick="selectAvatarIcon('biker')" id="btn-avatar-biker" class="avatar-btn p-2.5 bg-slate-900 rounded-xl border-2 border-slate-700 text-amber-400 font-extrabold text-xl flex flex-col items-center justify-center hover:bg-slate-800 transition-all">
+                                <i class="fa-solid fa-motorcycle"></i>
+                                <span class="text-[9px] mt-1 text-white font-bold">Pemotor</span>
+                            </button>
+                            <button type="button" onclick="selectAvatarIcon('sultan')" id="btn-avatar-sultan" class="avatar-btn p-2.5 bg-slate-900 rounded-xl border-2 border-slate-700 text-amber-400 font-extrabold text-xl flex flex-col items-center justify-center hover:bg-slate-800 transition-all">
+                                <i class="fa-solid fa-user-ninja"></i>
+                                <span class="text-[9px] mt-1 text-white font-bold">Sultan</span>
+                            </button>
+                            <button type="button" onclick="selectAvatarIcon('farmer')" id="btn-avatar-farmer" class="avatar-btn p-2.5 bg-slate-900 rounded-xl border-2 border-slate-700 text-amber-400 font-extrabold text-xl flex flex-col items-center justify-center hover:bg-slate-800 transition-all">
+                                <i class="fa-solid fa-wheat-awn"></i>
+                                <span class="text-[9px] mt-1 text-white font-bold">Petani</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- RPG Stat Sliders -->
+                    <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-emerald-500/40 space-y-3">
+                        <div class="text-xs font-black text-amber-300 uppercase flex justify-between">
+                            <span><i class="fa-solid fa-sliders"></i> Tune RPG Stats:</span>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between text-[11px] font-bold text-slate-300 mb-1">
+                                <span>Gorengan Power:</span>
+                                <span id="lblGorengan" class="text-amber-400">95%</span>
+                            </div>
+                            <input type="range" id="sliderGorengan" min="50" max="100" value="95" oninput="handleStatSliderChange()" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-[11px] font-bold text-slate-300 mb-1">
+                                <span>Kadar Sawit:</span>
+                                <span id="lblSawit" class="text-emerald-400">100%</span>
+                            </div>
+                            <input type="range" id="sliderSawit" min="50" max="100" value="100" oninput="handleStatSliderChange()" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-[11px] font-bold text-slate-300 mb-1">
+                                <span>Toleransi Macet:</span>
+                                <span id="lblMacet" class="text-rose-400">90%</span>
+                            </div>
+                            <input type="range" id="sliderMacet" min="50" max="100" value="90" oninput="handleStatSliderChange()" class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer">
+                        </div>
+                    </div>
+
+                    <!-- Form Action Buttons -->
+                    <div class="pt-2 grid grid-cols-2 gap-3">
+                        <button type="button" onclick="randomizePassportStats(); playSound('pop');" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-extrabold py-3 rounded-xl border border-amber-400/40 transition-all text-xs flex items-center justify-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-dice"></i> Randomize
+                        </button>
+                        <button type="button" onclick="manualSavePassport()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-xl border border-emerald-400/50 transition-all text-xs flex items-center justify-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Live Passport Display -->
+                <div class="lg:col-span-7 flex flex-col items-center">
+                    
+                    <!-- Passport Card Frame -->
+                    <div id="passportCardFrame" class="w-full max-w-md bg-gradient-to-br from-amber-100 via-amber-50 to-amber-200 text-slate-900 rounded-3xl p-5 sm:p-6 border-4 border-amber-400 shadow-2xl relative overflow-hidden transition-all duration-300">
+                        
+                        <!-- Card Header -->
+                        <div class="flex items-center justify-between border-b-2 border-amber-300/80 pb-3 mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-sawit-700 rounded-xl flex items-center justify-center text-amber-300 text-lg border-2 border-white shadow-sm">
+                                    <i class="fa-solid fa-flag"></i>
+                                </div>
+                                <div>
+                                    <div class="font-display font-black text-base text-sawit-900 tracking-tight">PASPOR DIGITAL WNI</div>
+                                    <div class="text-[10px] font-extrabold text-sawit-700 uppercase tracking-widest">Republik Kelapa Sawit</div>
+                                </div>
+                            </div>
+                            <span class="bg-merahWni text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow">VERIFIED WNI</span>
+                        </div>
+
+                        <!-- Main Details Grid -->
+                        <div class="grid grid-cols-3 gap-3.5 mb-4 items-center">
+                            <!-- Avatar Preview Box -->
+                            <div class="col-span-1 bg-gradient-to-b from-sawit-600 to-sawit-800 rounded-2xl h-36 border-2 border-white flex flex-col items-center justify-center text-white shadow-inner relative overflow-hidden p-2 text-center">
+                                <div id="passportAvatarDisplay" class="text-4xl text-amber-300 mb-1">
+                                    <i class="fa-solid fa-baby"></i>
+                                </div>
+                                <span id="avatarTitleBadge" class="text-[9px] font-black bg-amber-400 text-slate-900 px-2 py-0.5 rounded-full uppercase truncate w-full">SAWIT BABY</span>
+                            </div>
+
+                            <!-- Character Text Data -->
+                            <div class="col-span-2 space-y-2 text-xs font-bold text-slate-800">
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block uppercase">Nama Karakter WNI:</span>
+                                    <span id="cardCharNameDisplay" class="text-sm font-extrabold text-sawit-900 truncate block">Budi Sawit Saputra</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block uppercase">Provinsi Spawning:</span>
+                                    <span id="cardProvinceDisplay" class="text-xs font-bold text-slate-700 truncate block">Riau (Pusat Sawit)</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block uppercase">Gelar Keahlian:</span>
+                                    <span id="cardSkillDisplay" class="text-[11px] font-extrabold text-emerald-900 bg-emerald-200 px-2 py-0.5 rounded inline-block truncate max-w-full">Pakar Harga Sawit & Gorengan</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RPG Stat Bars -->
+                        <div class="space-y-2.5 bg-white/90 p-3.5 rounded-2xl border border-amber-200/80 text-xs shadow-inner">
+                            <div>
+                                <div class="flex items-center justify-between font-extrabold text-slate-700 mb-1">
+                                    <span><i class="fa-solid fa-shield-cat text-amber-500"></i> Ketahanan Gorengan:</span>
+                                    <span id="valGorengan" class="text-sawit-800 font-black">95%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                    <div id="barGorengan" class="bg-amber-500 h-2 rounded-full transition-all duration-300" style="width: 95%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between font-extrabold text-slate-700 mb-1">
+                                    <span><i class="fa-solid fa-tree text-emerald-600"></i> Pemahaman Sawit:</span>
+                                    <span id="valSawit" class="text-sawit-800 font-black">100%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                    <div id="barSawit" class="bg-emerald-600 h-2 rounded-full transition-all duration-300" style="width: 100%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between font-extrabold text-slate-700 mb-1">
+                                    <span><i class="fa-solid fa-car-side text-rose-500"></i> Toleransi Macet:</span>
+                                    <span id="valMacet" class="text-sawit-800 font-black">90%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                    <div id="barMacet" class="bg-rose-500 h-2 rounded-full transition-all duration-300" style="width: 90%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer & Official Credit -->
+                        <div class="mt-4 pt-3 border-t border-amber-300/80 flex flex-wrap items-center justify-between text-[10px] font-extrabold text-slate-600 gap-1">
+                            <span id="passportIDDisplay">ID: WNI-2026-99812-SAWIT</span>
+                            <span class="text-sawit-800 font-black bg-white/80 px-2 py-0.5 rounded border border-amber-300">
+                                ServerIndonesiaV1.vercel.app
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <!-- Direct PNG Download Button -->
+                    <div class="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-md">
+                        <button type="button" onclick="downloadPassportPNG(event)" class="w-full bg-minyak-500 hover:bg-amber-400 text-slate-900 font-black px-6 py-3.5 rounded-2xl shadow-clay-gold active:translate-y-1 transition-all text-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-arrow-down text-lg"></i>
+                            <span>Download Gambar Paspor (PNG)</span>
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Sawit Realtime Market -->
+    <section id="sawit-market" class="py-12 sm:py-16 bg-emerald-50/60">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border-4 border-emerald-200 shadow-xl grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                
+                <div class="space-y-1 text-center md:text-left">
+                    <span class="bg-emerald-100 text-sawit-800 font-extrabold text-xs px-3 py-1 rounded-full inline-block">
+                        <i class="fa-solid fa-chart-line"></i> MARKET REALTIME 2026
+                    </span>
+                    <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900">Indeks Sawit Server</h3>
+                    <p class="text-slate-600 text-xs sm:text-sm font-medium">Update harga minyak kelapa sawit dunia dan gorengan warung terdekat.</p>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-200 flex items-center gap-4">
+                    <div class="w-12 h-12 icon-3d-box rounded-xl flex items-center justify-center text-amber-500 text-2xl font-black shrink-0">
+                        <i class="fa-solid fa-bottle-droplet"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-slate-500">Harga Minyak Pouch 2L</div>
+                        <div class="text-lg sm:text-xl font-black text-slate-900">Rp 34.500 <span class="text-emerald-600 text-xs font-bold"><i class="fa-solid fa-arrow-trend-up"></i> Stabil</span></div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-200 flex items-center gap-4">
+                    <div class="w-12 h-12 icon-3d-box rounded-xl flex items-center justify-center text-sawit-600 text-2xl font-black shrink-0">
+                        <i class="fa-solid fa-tree"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-slate-500">Harga Tandan Buah Sawit (TBS)</div>
+                        <div class="text-lg sm:text-xl font-black text-slate-900">Rp 3.120 / Kg <span class="text-emerald-600 text-xs font-bold"><i class="fa-solid fa-check"></i> Cuan</span></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Action CTA Button (Mobile & Desktop) -->
+    <div class="fixed bottom-5 right-5 z-40">
+        <a href="#wni-form" onclick="playSound('pop');" class="glow-button bg-gradient-to-r from-minyak-500 to-amber-400 hover:from-amber-400 hover:to-minyak-500 text-slate-950 font-extrabold px-5 py-3 rounded-full shadow-clay-gold active:translate-y-1 transition-all flex items-center gap-2 border-2 border-white text-xs sm:text-sm">
+            <i class="fa-solid fa-address-card text-lg"></i>
+            <span class="font-black">Paspor WNI</span>
+        </a>
+    </div>
+
+    <!-- Toast Notification Message UI -->
+    <div id="toastNotice" class="fixed top-24 right-5 z-50 bg-slate-900 text-white font-bold text-xs px-4 py-3 rounded-2xl border-2 border-amber-400 shadow-2xl flex items-center gap-2 transform translate-x-72 opacity-0 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg" id="toastIcon"></i>
+        <span id="toastMsg">Notification message</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-sawit-900 text-slate-300 py-10 border-t-8 border-minyak-500 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
+            <div class="flex items-center justify-center gap-2 text-lg sm:text-xl font-black text-amber-400">
+                <i class="fa-solid fa-tree"></i> SERVER INDONESIA WNI <i class="fa-solid fa-tree"></i>
+            </div>
+            <p class="text-xs sm:text-sm text-emerald-200/80 max-w-xl mx-auto font-medium">
+                Situs web satire humor kehidupan lokal Indonesia. Official link server: <a href="https://ServerIndonesiaV1.vercel.app" class="underline text-amber-300 font-bold hover:text-white">ServerIndonesiaV1.vercel.app</a>
+            </p>
+            <div class="text-[11px] text-slate-400 pt-3 border-t border-sawit-800 font-semibold">
+                Copyright ©️ 2026 WNI Starter Pack • ServerIndonesiaV1.vercel.app • Dibuat dengan 100% Minyak Kelapa Sawit Murni 🇮🇩
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /* ----------------------------------------------------
+           1. AUDIO SYNTHESIZER (Web Audio API)
+           ---------------------------------------------------- */
+        let audioEnabled = true;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const btn = document.getElementById('audioBtn');
+            const icon = document.getElementById('audioIcon');
+            if (audioEnabled) {
+                btn.classList.remove('bg-slate-200', 'text-slate-600');
+                btn.classList.add('bg-amber-100', 'text-amber-900');
+                btn.querySelector('span').innerText = 'SFX: ON';
+                icon.className = 'fa-solid fa-volume-high text-amber-700';
+                playSound('pop');
+            } else {
+                btn.classList.add('bg-slate-200', 'text-slate-600');
+                btn.classList.remove('bg-amber-100', 'text-amber-900');
+                btn.querySelector('span').innerText = 'SFX: OFF';
+                icon.className = 'fa-solid fa-volume-xmark';
+            }
+        }
+
+        function playSound(type) {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'pop') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(350, now);
+                    osc.frequency.exponentialRampToValueAtTime(700, now + 0.08);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'click') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(280, now);
+                    osc.frequency.linearRampToValueAtTime(140, now + 0.05);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'cheer') {
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                        const chordOsc = audioCtx.createOscillator();
+                        const chordGain = audioCtx.createGain();
+                        chordOsc.connect(chordGain);
+                        chordGain.connect(audioCtx.destination);
+
+                        chordOsc.type = 'sine';
+                        chordOsc.frequency.setValueAtTime(freq, now + idx * 0.05);
+                        chordGain.gain.setValueAtTime(0.1, now + idx * 0.05);
+                        chordGain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.3);
+
+                        chordOsc.start(now + idx * 0.05);
+                        chordOsc.stop(now + idx * 0.05 + 0.3);
+                    });
+                }
+            } catch(e) {
+                console.warn("Audio error:", e);
+            }
+        }
+
+        /* ----------------------------------------------------
+           2. TOAST NOTIFICATION UTILITY
+           ---------------------------------------------------- */
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotice');
+            const msgEl = document.getElementById('toastMsg');
+            if (!toast || !msgEl) return;
+
+            msgEl.innerText = msg;
+            toast.classList.remove('translate-x-72', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-x-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('translate-x-72', 'opacity-0', 'pointer-events-none');
+                toast.classList.remove('translate-x-0', 'opacity-100');
+            }, 3000);
+        }
+
+        /* ----------------------------------------------------
+           3. THREE.JS 3D SCENE SETUP
+           ---------------------------------------------------- */
+        let scene, camera, renderer, controls;
+        let babyGroup, palmTreesGroup;
+        let isRotating = true;
+
+        function initThreeScene() {
+            const container = document.getElementById('three-hero-container');
+            if (!container) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xF0FDF4);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.set(0, 3.8, 10.5);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // Orbit Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2.15;
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
+
+            const mainLight = new THREE.DirectionalLight(0xfff5ea, 1.2);
+            mainLight.position.set(7, 11, 7);
+            mainLight.castShadow = true;
+            scene.add(mainLight);
+
+            const fillLight = new THREE.DirectionalLight(0x7dd3fc, 0.4);
+            fillLight.position.set(-7, 5, -5);
+            scene.add(fillLight);
+
+            // Island Base
+            const islandGeo = new THREE.CylinderGeometry(4.2, 3.8, 0.7, 32);
+            const islandMat = new THREE.MeshStandardMaterial({ color: 0x2D5A27, roughness: 0.5 });
+            const island = new THREE.Mesh(islandGeo, islandMat);
+            island.position.y = -0.35;
+            island.receiveShadow = true;
+            scene.add(island);
+
+            // Soil
+            const soilGeo = new THREE.CylinderGeometry(3.8, 3.2, 0.5, 32);
+            const soilMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+            const soil = new THREE.Mesh(soilGeo, soilMat);
+            soil.position.y = -0.9;
+            scene.add(soil);
+
+            // Character Group
+            babyGroup = new THREE.Group();
+            scene.add(babyGroup);
+
+            // Gift Box (Spawning Box)
+            const boxGeo = new THREE.BoxGeometry(2.1, 1.7, 2.1);
+            const boxMat = new THREE.MeshStandardMaterial({ color: 0xDC2626, roughness: 0.3 });
+            const giftBox = new THREE.Mesh(boxGeo, boxMat);
+            giftBox.position.set(0, 0.85, 0);
+            giftBox.castShadow = true;
+            babyGroup.add(giftBox);
+
+            // Gold Ribbon
+            const ribbonGeo = new THREE.BoxGeometry(2.15, 1.72, 0.38);
+            const ribbonMat = new THREE.MeshStandardMaterial({ color: 0xFFC107, roughness: 0.2, metalness: 0.2 });
+            const ribbon = new THREE.Mesh(ribbonGeo, ribbonMat);
+            ribbon.position.set(0, 0.85, 0);
+            babyGroup.add(ribbon);
+
+            // Cute Baby Head
+            const headGeo = new THREE.SphereGeometry(0.68, 32, 32);
+            const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac, roughness: 0.4 });
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.set(0, 2.1, 0);
+            head.castShadow = true;
+            babyGroup.add(head);
+
+            // Cap
+            const capGeo = new THREE.SphereGeometry(0.7, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+            const capMat = new THREE.MeshStandardMaterial({ color: 0x2563EB, roughness: 0.5 });
+            const cap = new THREE.Mesh(capGeo, capMat);
+            cap.position.set(0, 2.12, 0);
+            cap.rotation.x = -0.2;
+            babyGroup.add(cap);
+
+            // Eyes
+            const eyeGeo = new THREE.SphereGeometry(0.08, 16, 16);
+            const eyeMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+            const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+            leftEye.position.set(-0.21, 2.15, 0.6);
+            const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+            rightEye.position.set(0.21, 2.15, 0.6);
+            babyGroup.add(leftEye, rightEye);
+
+            // Cheeks
+            const cheekGeo = new THREE.SphereGeometry(0.09, 16, 16);
+            const cheekMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.8 });
+            const leftCheek = new THREE.Mesh(cheekGeo, cheekMat);
+            leftCheek.position.set(-0.33, 2.0, 0.57);
+            const rightCheek = new THREE.Mesh(cheekGeo, cheekMat);
+            rightCheek.position.set(0.33, 2.0, 0.57);
+            babyGroup.add(leftCheek, rightCheek);
+
+            // Certificate Document Item
+            const docGeo = new THREE.BoxGeometry(0.65, 0.85, 0.05);
+            const docMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+            const doc = new THREE.Mesh(docGeo, docMat);
+            doc.position.set(-1.15, 1.7, 0.75);
+            doc.rotation.set(0.2, 0.4, -0.2);
+            doc.castShadow = true;
+            babyGroup.add(doc);
+
+            // Oil Pouch Item
+            const pouchGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.85, 16);
+            const pouchMat = new THREE.MeshStandardMaterial({
+                color: 0xFFC107,
+                roughness: 0.1,
+                transparent: true,
+                opacity: 0.85
+            });
+            const pouch = new THREE.Mesh(pouchGeo, pouchMat);
+            pouch.position.set(1.15, 1.7, 0.75);
+            pouch.rotation.set(0.1, -0.3, 0.2);
+            pouch.castShadow = true;
+            babyGroup.add(pouch);
+
+            // Palm Trees
+            palmTreesGroup = new THREE.Group();
+            scene.add(palmTreesGroup);
+
+            function addPalmTree(x, z, scale = 1) {
+                const tree = new THREE.Group();
+                const trunkGeo = new THREE.CylinderGeometry(0.14, 0.22, 2.4, 8);
+                const trunkMat = new THREE.MeshStandardMaterial({ color: 0x854d0e, roughness: 0.8 });
+                const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+                trunk.position.y = 1.2;
+                trunk.castShadow = true;
+                tree.add(trunk);
+
+                const leafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.4 });
+                for (let i = 0; i < 6; i++) {
+                    const leafGeo = new THREE.ConeGeometry(0.45, 1.7, 4);
+                    const leaf = new THREE.Mesh(leafGeo, leafMat);
+                    leaf.position.set(0, 2.4, 0);
+                    leaf.rotation.z = 1.2;
+                    leaf.rotation.y = (i * Math.PI) / 3;
+                    tree.add(leaf);
+                }
+
+                tree.position.set(x, 0, z);
+                tree.scale.set(scale, scale, scale);
+                return tree;
+            }
+
+            palmTreesGroup.add(addPalmTree(-2.6, -1.8, 1.0));
+            palmTreesGroup.add(addPalmTree(2.6, -1.8, 1.15));
+
+            let clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const elapsedTime = clock.getElapsedTime();
+
+                if (babyGroup) {
+                    babyGroup.position.y = Math.sin(elapsedTime * 2) * 0.08;
+                }
+
+                if (isRotating && controls) {
+                    scene.rotation.y = elapsedTime * 0.2;
+                }
+
+                controls.update();
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            window.addEventListener('resize', () => {
+                if (!container) return;
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
+            });
+        }
+
+        function toggle3DRotation() {
+            isRotating = !isRotating;
+            const btn 
